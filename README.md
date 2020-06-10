@@ -2,7 +2,7 @@ This repository contains the Pest Plugin Watch.
 
 > If you want to start testing your application with Pest, visit the main **[Pest Repository](https://github.com/pestphp/pest)**.
 
-- Explore the docs: **[pestphp.com/docs/watch »](https://pestphp.com/docs/coverage/)**
+- Explore the docs: **[pestphp.com/docs/watch »](https://pestphp.com/docs/guides/watch/)**
 - Follow us on Twitter: **[@pestphp »](https://twitter.com/pestphp)**
 - Join us on the Discord Server: **[discord.gg/bMAJv82 »](https://discord.gg/bMAJv82)**
 
