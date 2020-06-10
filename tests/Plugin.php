@@ -1,6 +1,6 @@
 <?php
 
-use Pest\PluginName\Plugin;
+use Pest\Watch\Plugin;
 
 it('has plugin', function () {
     assertTrue(class_exists(Plugin::class));
