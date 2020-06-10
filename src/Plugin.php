@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pest\Watch;
 
-use Pest\Contracts\Plugins\AddsOutput;
 use Pest\Contracts\Plugins\HandlesArguments;
 use React\ChildProcess\Process;
 use React\EventLoop\Factory;
@@ -13,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final class Plugin implements AddsOutput, HandlesArguments
+final class Plugin implements HandlesArguments
 {
     /**
      * @var OutputInterface
@@ -27,35 +26,34 @@ final class Plugin implements AddsOutput, HandlesArguments
 
     public function handleArguments(array $originals): array
     {
-        if (in_array('--watch', $originals)) {
-            $loop    = Factory::create();
-            $watcher = new Watch('tests', $loop);
-            $watcher->run();
-
-            unset($originals[array_search('--watch', $originals)]);
-            $pest = implode(' ', $originals);
-
-            $watcher->on('change', static function () use ($pest) {
-                $loop = Factory::create();
-                $process = new Process($pest);
-                $process->start($loop);
-                $process->stdout->on('data', function ($line) {
-                    echo $line;
-                });
-                $process->on('exit', function ($exitCode, $termSignal) {
-                    echo PHP_EOL;
-                });
-                $loop->run();
-            });
-
-            $loop->run();
+        if (!in_array('--watch', $originals, true)) {
+            return $originals;
         }
 
-        return $originals;
-    }
+        $loop    = Factory::create();
+        $watcher = new Watch($loop, 'tests');
+        $watcher->run();
 
-    public function addOutput(int $result): int
-    {
-        return 0;
+        unset($originals[array_search('--watch', $originals, true)]);
+        $command = implode(' ', $originals);
+        $output  = $this->output;
+
+        $watcher->on('change', static function () use ($command, $output): void {
+            $loop = Factory::create();
+            $process = new Process($command);
+            $process->start($loop);
+            // @phpstan-ignore-next-line
+            $process->stdout->on('data', function ($line) use ($output): void {
+                $output->write($line);
+            });
+            $process->on('exit', function () use ($output): void {
+                $output->writeln('');
+            });
+            $loop->run();
+        });
+
+        $loop->run();
+
+        exit(0);
     }
 }
