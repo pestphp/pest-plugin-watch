@@ -1,6 +1,6 @@
 {
-    "name": "pestphp/pest-plugin-template",
-    "description": "My awesome plugin",
+    "name": "pestphp/pest-plugin-watch",
+    "description": "The Pest Watch Plugin",
     "keywords": [
         "php",
         "framework",
@@ -8,32 +8,46 @@
         "unit",
         "test",
         "testing",
-        "plugin"
+        "plugin",
+        "watch"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Caneco",
+            "email": "caneco@me.com"
+        }
+    ],
     "require": {
         "php": "^7.3",
-        "pestphp/pest": "^0.1"
+        "pestphp/pest": "^0.2",
+        "react/child-process": "^0.6.1",
+        "react/event-loop": "^1.1",
+        "pestphp/pest-plugin": "^0.2"
     },
     "autoload": {
         "psr-4": {
-            "Pest\\PluginName\\": "src/"
+            "Pest\\Watch\\": "src/"
         }
     },
     "require-dev": {
-        "ergebnis/phpstan-rules": "^0.14.4",
-        "friendsofphp/php-cs-fixer": "^2.16.3",
-        "phpstan/phpstan": "^0.12.25",
-        "phpstan/phpstan-strict-rules": "^0.12.2",
-        "rector/rector": "^0.7.25",
-        "symfony/var-dumper": "^5.0.8",
-        "thecodingmachine/phpstan-strict-rules": "^0.12.0"
+        "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
         "preferred-install": "dist"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.2.x-dev"
+        },
+        "pest": {
+            "plugins": [
+                "Pest\\Watch\\Plugin"
+            ]
+        }
     },
     "scripts": {
         "lint": "rector process src && php-cs-fixer fix -v",
@@ -45,11 +59,5 @@
             "@test:types",
             "@test:unit"
         ]
-    },
-    "repositories": {
-        "pest": {
-            "type": "vcs",
-            "url": "https://github.com/pestphp/pest"
-        }
     }
 }
