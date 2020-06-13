@@ -36,6 +36,7 @@ final class Plugin implements HandlesArguments
 
         unset($originals[array_search('--watch', $originals, true)]);
         $command = implode(' ', $originals);
+
         $output  = $this->output;
 
         $watcher->on('change', static function () use ($command, $output): void {
@@ -51,6 +52,8 @@ final class Plugin implements HandlesArguments
             });
             $loop->run();
         });
+
+        $watcher->emit('change');
 
         $loop->run();
 
