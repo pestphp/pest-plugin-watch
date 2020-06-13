@@ -58,6 +58,7 @@
             "@test:lint",
             "@test:types",
             "@test:unit"
-        ]
+        ],
+        "prep": "composer lint && composer test"
     }
 }

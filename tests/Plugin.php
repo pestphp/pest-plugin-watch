@@ -2,6 +2,5 @@
 
 use Pest\Watch\Plugin;
 
-it('has plugin', function () {
-    assertTrue(class_exists(Plugin::class));
-});
+it('has plugin')
+    ->assertTrue(class_exists(Plugin::class));
