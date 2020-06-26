@@ -71,8 +71,7 @@ final class Plugin implements HandlesArguments
         }
 
         $this->output->writeln(sprintf(
-            '  <fg=black;bg=red>[WARNING] %s</>',
-            'fswatch is required',
+            "\n  <fg=white;bg=red;options=bold> ERROR </> fswatch was not found.</>",
         ));
 
         $this->output->writeln(sprintf(
