@@ -32,7 +32,25 @@ final class Plugin implements HandlesArguments
 
         $loop    = Factory::create();
         $watcher = new Watch($loop, 'tests');
-        $watcher->run();
+
+        try {
+            $watcher->run();
+        } catch (\LogicException $exception) {
+            if ($exception->getMessage() !== 'fswatch not found') {
+                throw $exception;
+            }
+
+            $this->output->writeln(sprintf(
+                '  <fg=black;bg=red>[WARNING] %s</>',
+                'fswatch is required',
+            ));
+            $this->output->writeln(sprintf(
+                "\n  Install it from: %s",
+                'https://github.com/emcrisostomo/fswatch#getting-fswatch',
+            ));
+
+            exit(1);
+        }
 
         unset($originals[array_search('--watch', $originals, true)]);
         $command = implode(' ', $originals);
