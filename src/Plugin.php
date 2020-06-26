@@ -30,6 +30,8 @@ final class Plugin implements HandlesArguments
             return $originals;
         }
 
+        $this->checkFswatchIsAvailable();
+
         $loop    = Factory::create();
         $watcher = new Watch($loop, 'tests');
         $watcher->run();
@@ -58,5 +60,25 @@ final class Plugin implements HandlesArguments
         $loop->run();
 
         exit(0);
+    }
+
+    private function checkFswatchIsAvailable(): void
+    {
+        exec('fswatch 2>&1', $output);
+
+        if (strpos(implode(' ', $output), 'command not found') === false) {
+            return;
+        }
+
+        $this->output->writeln(sprintf(
+            "\n  <fg=white;bg=red;options=bold> ERROR </> fswatch was not found.</>",
+        ));
+
+        $this->output->writeln(sprintf(
+            "\n  Install it from: %s",
+            'https://github.com/emcrisostomo/fswatch#getting-fswatch',
+        ));
+
+        exit(1);
     }
 }
