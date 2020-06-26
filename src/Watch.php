@@ -43,25 +43,11 @@ final class Watch implements EventEmitterInterface
     }
 
     /**
-     * Check if fswatch is available.
-     */
-    public function isAvailable(): bool
-    {
-        exec('fswatch 2>&1', $output);
-
-        return strpos(implode(' ', $output), 'command not found') === false;
-    }
-
-    /**
      * Run the ReactPHP loop function with the change
      * event listener.
      */
     public function run(): void
     {
-        if (!$this->isAvailable()) {
-            throw new \LogicException('fswatch is required');
-        }
-
         $this->process = new Process($this->command);
 
         $this->process->start($this->loop);
