@@ -20,13 +20,13 @@
     ],
     "require": {
         "php": "^7.3",
-        "pestphp/pest": "^0.2",
+        "pestphp/pest-plugin": "^0.2",
         "react/child-process": "^0.6.1",
-        "react/event-loop": "^1.1",
-        "pestphp/pest-plugin": "^0.2"
+        "react/event-loop": "^1.1"
     },
     "conflict": {
-        "evenement/evenement": "^1.0"
+        "evenement/evenement": "^1.0",
+        "pestphp/pest": "<0.2"
     },
     "autoload": {
         "psr-4": {
@@ -34,6 +34,7 @@
         }
     },
     "require-dev": {
+        "pestphp/pest": "^0.2",
         "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
