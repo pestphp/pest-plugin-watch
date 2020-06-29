@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Plugin implements HandlesArguments
 {
+    public const WATCHED_DIRECTORIES = ['app', 'src', 'tests'];
+
     /**
      * @var OutputInterface
      */
@@ -33,7 +35,7 @@ final class Plugin implements HandlesArguments
         $this->checkFswatchIsAvailable();
 
         $loop    = Factory::create();
-        $watcher = new Watch($loop, 'tests');
+        $watcher = new Watch($loop, self::WATCHED_DIRECTORIES);
         $watcher->run();
 
         unset($originals[array_search('--watch', $originals, true)]);
