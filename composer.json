@@ -19,8 +19,8 @@
         }
     ],
     "require": {
-        "php": "^7.3",
-        "pestphp/pest-plugin": "^0.2",
+        "php": "^7.3 || ^8.0",
+        "pestphp/pest-plugin": "^0.3",
         "react/child-process": "^0.6.1",
         "react/event-loop": "^1.1"
     },
