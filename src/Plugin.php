@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pest\Watch;
 
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\Str;
 use React\ChildProcess\Process;
 use React\EventLoop\Factory;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class Plugin implements HandlesArguments
 {
     public const WATCHED_DIRECTORIES = ['app', 'src', 'tests'];
+
+    private const WATCH_DIRS_OPTION = 'watch-dirs';
 
     /**
      * @var OutputInterface
@@ -34,8 +37,21 @@ final class Plugin implements HandlesArguments
 
         $this->checkFswatchIsAvailable();
 
+        $watchedDirectories = self::WATCHED_DIRECTORIES;
+
+        if (($additionalWatchDirectories = $this->watchDirectories($originals)) && !empty($additionalWatchDirectories)) {
+            foreach ($additionalWatchDirectories as $key => $directories) {
+                $watchedDirectories = array_merge(
+                    $watchedDirectories,
+                    explode(',', str_replace(sprintf('--%s=', self::WATCH_DIRS_OPTION), '', $directories)),
+                );
+
+                unset($originals[$key]);
+            }
+        }
+
         $loop    = Factory::create();
-        $watcher = new Watch($loop, self::WATCHED_DIRECTORIES);
+        $watcher = new Watch($loop, $watchedDirectories);
         $watcher->run();
 
         unset($originals[array_search('--watch', $originals, true)]);
@@ -82,5 +98,12 @@ final class Plugin implements HandlesArguments
         ));
 
         exit(1);
+    }
+
+    private function watchDirectories(array $originals): array
+    {
+        return array_filter($originals, static function ($value) {
+            return Str::startsWith($value, sprintf('--%s', self::WATCH_DIRS_OPTION));
+        });
     }
 }
