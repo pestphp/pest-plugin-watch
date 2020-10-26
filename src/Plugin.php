@@ -48,6 +48,8 @@ final class Plugin implements HandlesArguments
 
                 unset($originals[$key]);
             }
+
+            $watchedDirectories = array_unique($watchedDirectories);
         }
 
         $loop    = Factory::create();
