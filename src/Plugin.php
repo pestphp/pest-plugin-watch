@@ -39,7 +39,7 @@ final class Plugin implements HandlesArguments
 
         $watchedDirectories = self::WATCHED_DIRECTORIES;
 
-        if (($additionalWatchDirectories = $this->watchDirectories($originals)) && !empty($additionalWatchDirectories)) {
+        if (($additionalWatchDirectories = $this->watchDirectories($originals)) !== []) {
             foreach ($additionalWatchDirectories as $key => $directories) {
                 $watchedDirectories = array_merge(
                     $watchedDirectories,
@@ -100,9 +100,14 @@ final class Plugin implements HandlesArguments
         exit(1);
     }
 
+    /**
+     * @param array<int, string> $originals
+     *
+     * @return array<int, string>
+     */
     private function watchDirectories(array $originals): array
     {
-        return array_filter($originals, static function ($value) {
+        return array_filter($originals, static function ($value): bool {
             return Str::startsWith($value, sprintf('--%s', self::WATCH_DIRS_OPTION));
         });
     }
