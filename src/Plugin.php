@@ -56,13 +56,12 @@ final class Plugin implements HandlesArguments
             return $originals;
         }
 
-        if ($input->getOption(self::WATCH_OPTION) !== null) {
-            /** @var string $directories */
-            $directories              = $input->getOption(self::WATCH_OPTION);
-            $this->watchedDirectories = explode(',', $directories);
-        }
-
         $this->checkFswatchIsAvailable();
+
+        if ($input->getOption(self::WATCH_OPTION) !== null) {
+            /* @phpstan-ignore-next-line */
+            $this->watchedDirectories = explode(',', $input->getOption(self::WATCH_OPTION));
+        }
 
         $loop    = Factory::create();
         $watcher = new Watch($loop, $this->watchedDirectories);
