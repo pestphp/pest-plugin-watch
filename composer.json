@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "pestphp/pest-plugin": "^0.3",
+        "pestphp/pest-plugin": "^1.0",
         "react/child-process": "^0.6.1",
         "react/event-loop": "^1.1"
     },
@@ -34,7 +34,7 @@
         }
     },
     "require-dev": {
-        "pestphp/pest": "^0.3",
+        "pestphp/pest": "^1.0",
         "pestphp/pest-dev-tools": "dev-master"
     },
     "minimum-stability": "dev",
@@ -45,7 +45,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.3.x-dev"
+            "dev-master": "1.x-dev"
         },
         "pest": {
             "plugins": [
