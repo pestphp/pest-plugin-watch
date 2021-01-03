@@ -17,7 +17,7 @@ final class Watch implements EventEmitterInterface
     use EventEmitterTrait;
 
     /**
-     * @var \React\ChildProcess\Process|mixed
+     * @var Process|mixed
      */
     public $process;
 
@@ -27,7 +27,7 @@ final class Watch implements EventEmitterInterface
     public $command;
 
     /**
-     * @var \React\EventLoop\LoopInterface|mixed
+     * @var LoopInterface|mixed
      */
     public $loop;
 

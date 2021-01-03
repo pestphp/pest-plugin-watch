@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Pest\Watch;
 
 use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Support\Str;
 use React\ChildProcess\Process;
 use React\EventLoop\Factory;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -16,10 +20,15 @@ final class Plugin implements HandlesArguments
 {
     public const WATCHED_DIRECTORIES = ['app', 'src', 'tests'];
 
+    private const WATCH_OPTION = 'watch';
+
     /**
      * @var OutputInterface
      */
     private $output;
+
+    /** @var array<int, string> */
+    private $watchedDirectories = self::WATCHED_DIRECTORIES;
 
     public function __construct(OutputInterface $output)
     {
@@ -28,17 +37,36 @@ final class Plugin implements HandlesArguments
 
     public function handleArguments(array $originals): array
     {
-        if (!in_array('--watch', $originals, true)) {
+        $arguments = array_merge([''], array_values(array_filter($originals, function ($original): bool {
+            return $original === sprintf('--%s', self::WATCH_OPTION) || Str::startsWith($original, sprintf('--%s=', self::WATCH_OPTION));
+        })));
+
+        $originals = array_flip($originals);
+        foreach ($arguments as $argument) {
+            unset($originals[$argument]);
+        }
+        $originals = array_flip($originals);
+
+        $inputs   = [];
+        $inputs[] = new InputOption(self::WATCH_OPTION, null, InputOption::VALUE_OPTIONAL, '', true);
+
+        $input = new ArgvInput($arguments, new InputDefinition($inputs));
+
+        if (!$input->hasParameterOption(sprintf('--%s', self::WATCH_OPTION))) {
             return $originals;
         }
 
         $this->checkFswatchIsAvailable();
 
+        if ($input->getOption(self::WATCH_OPTION) !== null) {
+            /* @phpstan-ignore-next-line */
+            $this->watchedDirectories = explode(',', $input->getOption(self::WATCH_OPTION));
+        }
+
         $loop    = Factory::create();
-        $watcher = new Watch($loop, self::WATCHED_DIRECTORIES);
+        $watcher = new Watch($loop, $this->watchedDirectories);
         $watcher->run();
 
-        unset($originals[array_search('--watch', $originals, true)]);
         $command = implode(' ', $originals);
 
         $output  = $this->output;
