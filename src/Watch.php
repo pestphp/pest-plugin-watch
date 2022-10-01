@@ -27,7 +27,7 @@ final class Watch implements EventEmitterInterface
     public $command;
 
     /**
-     * @var LoopInterface|mixed
+     * @var LoopInterface
      */
     public $loop;
 
