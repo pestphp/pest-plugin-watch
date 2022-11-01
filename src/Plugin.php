@@ -6,12 +6,14 @@ namespace Pest\Watch;
 
 use Pest\Contracts\Plugins\HandlesArguments;
 use Pest\Support\Str;
-use React\ChildProcess\Process;
-use React\EventLoop\Factory;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
+
+use function Termwind\render;
+use function Termwind\terminal;
 
 /**
  * @internal
@@ -22,20 +24,40 @@ final class Plugin implements HandlesArguments
 
     private const WATCH_OPTION = 'watch';
 
-    /**
-     * @var OutputInterface
-     */
-    private $output;
+    private string $command = 'vendor/bin/pest';
+
+    public Process $pestProcess;
 
     /** @var array<int, string> */
-    private $watchedDirectories = self::WATCHED_DIRECTORIES;
+    private array|string $watchedDirectories;
 
-    public function __construct(OutputInterface $output)
-    {
-        $this->output = $output;
+    public function __construct(
+        private OutputInterface $output
+    ) {
+        // remove non-existing directories from watched directories
+        $this->watchedDirectories = array_filter(self::WATCHED_DIRECTORIES, fn ($directory) => is_dir($directory));
     }
 
     public function handleArguments(array $originals): array
+    {
+        if (!$this->userWantsToWatch($originals)) {
+            return $originals;
+        }
+
+        $this->info('Watching for changes...');
+
+        // dd('end', $this->getCommand());
+        $processStarted = $this->startProcess();
+
+        // if the process failed to start, exit
+        if (!$processStarted) {
+            exit(1);
+        }
+
+        $this->listenForChanges();
+    }
+
+    private function userWantsToWatch(array $originals): bool
     {
         $arguments = array_merge([''], array_values(array_filter($originals, function ($original): bool {
             return $original === sprintf('--%s', self::WATCH_OPTION) || Str::startsWith($original, sprintf('--%s=', self::WATCH_OPTION));
@@ -45,7 +67,6 @@ final class Plugin implements HandlesArguments
         foreach ($arguments as $argument) {
             unset($originals[$argument]);
         }
-        $originals = array_flip($originals);
 
         $inputs   = [];
         $inputs[] = new InputOption(self::WATCH_OPTION, null, InputOption::VALUE_OPTIONAL, '', true);
@@ -53,62 +74,94 @@ final class Plugin implements HandlesArguments
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
 
         if (!$input->hasParameterOption(sprintf('--%s', self::WATCH_OPTION))) {
-            return $originals;
+            return false;
         }
 
-        $this->checkFswatchIsAvailable();
-
+        // set the watched directories
         if ($input->getOption(self::WATCH_OPTION) !== null) {
             /* @phpstan-ignore-next-line */
             $this->watchedDirectories = explode(',', $input->getOption(self::WATCH_OPTION));
         }
 
-        $loop    = Factory::create();
-        $watcher = new Watch($loop, $this->watchedDirectories);
-        $watcher->run();
+        // set command to run
+        $this->setCommand(implode(' ', array_flip($originals)));
 
-        $command = implode(' ', $originals);
-
-        $output  = $this->output;
-
-        $watcher->on('change', static function () use ($command, $output): void {
-            $loop = Factory::create();
-            $process = new Process($command);
-            $process->start($loop);
-            // @phpstan-ignore-next-line
-            $process->stdout->on('data', function ($line) use ($output): void {
-                $output->write($line);
-            });
-            $process->on('exit', function () use ($output): void {
-                $output->writeln('');
-            });
-            $loop->run();
-        });
-
-        $watcher->emit('change');
-
-        $loop->run();
-
-        exit(0);
+        return true;
     }
 
-    private function checkFswatchIsAvailable(): void
+    private function listenForChanges(): self
     {
-        exec('fswatch 2>&1', $output);
+        \Spatie\Watcher\Watch::paths(...$this->watchedDirectories)
+            ->onAnyChange(function (string $event, string $path) {
+                if ($this->changedPathShouldRestartPest($path)) {
+                    $this->restartProcess();
+                }
+            })
+            ->start();
 
-        if (strpos(implode(' ', $output), 'command not found') === false) {
-            return;
+        return $this;
+    }
+
+    private function startProcess(): bool
+    {
+        terminal()->clear();
+
+        $this->pestProcess = Process::fromShellCommandline($this->getCommand());
+
+        $this->pestProcess->setTty(true)->setTimeout(null);
+
+        $this->pestProcess->start(fn ($type, $output) => $this->output->write($output));
+
+        sleep(1);
+
+        return !$this->pestProcess->isTerminated();
+    }
+
+    private function restartProcess(): self
+    {
+        $this->info('Change detected! Restarting Pest...');
+
+        $this->pestProcess->stop(0);
+
+        $this->startProcess();
+
+        return $this;
+    }
+
+    private function changedPathShouldRestartPest(string $path): bool
+    {
+        if ($this->isPhpFile($path)) {
+            return true;
         }
 
-        $this->output->writeln(sprintf(
-            "\n  <fg=white;bg=red;options=bold> ERROR </> fswatch was not found.</>",
-        ));
+        foreach ($this->watchedDirectories as $configuredPath) {
+            if ($path === $configuredPath) {
+                return true;
+            }
+        }
 
-        $this->output->writeln(sprintf(
-            "\n  Install it from: %s",
-            'https://github.com/emcrisostomo/fswatch#getting-fswatch',
-        ));
+        return false;
+    }
 
-        exit(1);
+    private function isPhpFile(string $path): bool
+    {
+        return str_ends_with(strtolower($path), '.php');
+    }
+
+    public function getCommand(): string
+    {
+        return $this->command;
+    }
+
+    public function setCommand(string $command): void
+    {
+        $this->command = $command;
+    }
+
+    private function info(string $message): void
+    {
+        $html = "<div class='mx-2 mb-1 mt-1'><span class='px-1 bg-blue text-white uppercase'>info</span><span class='ml-1'>{$message}</span></div>";
+
+        render($html);
     }
 }
