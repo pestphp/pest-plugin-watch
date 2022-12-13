@@ -47,12 +47,12 @@ final class Plugin implements HandlesArguments
         }
         $originals = array_flip($originals);
 
-        $inputs   = [];
+        $inputs = [];
         $inputs[] = new InputOption(self::WATCH_OPTION, null, InputOption::VALUE_OPTIONAL, '', true);
 
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
 
-        if (!$input->hasParameterOption(sprintf('--%s', self::WATCH_OPTION))) {
+        if (! $input->hasParameterOption(sprintf('--%s', self::WATCH_OPTION))) {
             return $originals;
         }
 
@@ -63,13 +63,13 @@ final class Plugin implements HandlesArguments
             $this->watchedDirectories = explode(',', $input->getOption(self::WATCH_OPTION));
         }
 
-        $loop    = Factory::create();
+        $loop = Factory::create();
         $watcher = new Watch($loop, $this->watchedDirectories);
         $watcher->run();
 
         $command = implode(' ', $originals);
 
-        $output  = $this->output;
+        $output = $this->output;
 
         $watcher->on('change', static function () use ($command, $output): void {
             $loop = Factory::create();
