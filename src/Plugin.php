@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Terminal;
 
 /**
  * @internal
@@ -73,7 +74,15 @@ final class Plugin implements HandlesArguments
 
         $watcher->on('change', static function () use ($command, $output): void {
             $loop = Factory::create();
-            $process = new Process($command);
+
+            $terminal = new Terminal;
+
+            $process = new Process($command, null, [
+                'COLUMNS' => $terminal->getWidth(),
+                'LINES' => $terminal->getHeight(),
+                ...getenv(),
+            ]);
+
             $process->start($loop);
 
             $output->write("\033\143");
