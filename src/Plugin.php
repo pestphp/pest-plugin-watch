@@ -75,13 +75,14 @@ final class Plugin implements HandlesArguments
             $loop = Factory::create();
             $process = new Process($command);
             $process->start($loop);
+
+            $output->write("\033\143");
+
             // @phpstan-ignore-next-line
             $process->stdout->on('data', function ($line) use ($output): void {
                 $output->write($line);
             });
-            $process->on('exit', function () use ($output): void {
-                $output->writeln('');
-            });
+
             $loop->run();
         });
 
