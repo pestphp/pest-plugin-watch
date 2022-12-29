@@ -9,7 +9,7 @@
         </testsuite>
     </testsuites>
     <coverage>
-        <include processUncoveredFiles="true">
+        <include>
             <directory suffix=".php">./src</directory>
         </include>
     </coverage>
