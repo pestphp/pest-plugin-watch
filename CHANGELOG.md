@@ -1,11 +1,7 @@
-# Changelog
-All notable changes to this project will be documented in this file.
+# Release Notes for 2.x
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+## Unreleased
 
-## [Unreleased]
+## [v2.0.0 (2023-03-20)](https://github.com/pestphp/pest-plugin-watch/compare/v1.0.0...v2.0.0)
 
-## [Unreleased](first-commit-link)
-### Added
-- First version
+Please consult the [upgrade guide](https://pestphp.com/docs/upgrade-guide) and [release notes](https://pestphp.com/docs/announcing-pest2) in the official Pest documentation.
