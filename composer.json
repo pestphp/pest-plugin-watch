@@ -35,7 +35,7 @@
     },
     "require-dev": {
         "pestphp/pest": "^2.0.0",
-        "pestphp/pest-dev-tools": "^2.1.0"
+        "pestphp/pest-dev-tools": "^2.5.0"
     },
     "extra": {
         "branch-alias": {
