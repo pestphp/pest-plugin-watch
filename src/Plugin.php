@@ -69,6 +69,10 @@ final class Plugin implements HandlesArguments
         $watcher->run();
 
         $command = implode(' ', $originals);
+        $matches = preg_grep('/^--test-directory=.*/', $_SERVER['argv']);
+        if ($matches) {
+            $command .= ' ' . array_pop($matches);
+        }
 
         $output = $this->output;
 
