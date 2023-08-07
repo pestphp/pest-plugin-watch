@@ -70,6 +70,10 @@ final class Plugin implements HandlesArguments
 
         $command = implode(' ', $originals);
 
+        if(strpos($command, '--colors=') === false) {
+            $command .= ' --colors=always';
+        }
+
         $output = $this->output;
 
         $watcher->on('change', static function () use ($command, $output): void {
