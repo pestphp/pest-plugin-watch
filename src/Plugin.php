@@ -106,7 +106,7 @@ final class Plugin implements HandlesArguments
     {
         exec('fswatch 2>&1', $output);
 
-        if (strpos(implode(' ', $output), 'command not found') === false) {
+        if (strpos(implode(' ', $output), 'not found') === false) {
             return;
         }
 
