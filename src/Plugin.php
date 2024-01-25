@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pest\Watch;
 
-use Pest\Contracts\Plugins\HandlesArguments;
+use Pest\Contracts\Plugins\HandlesOriginalArguments;
 use Pest\Support\Str;
 use React\ChildProcess\Process;
 use React\EventLoop\Factory;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Terminal;
 /**
  * @internal
  */
-final class Plugin implements HandlesArguments
+final class Plugin implements HandlesOriginalArguments
 {
     public const WATCHED_DIRECTORIES = ['app', 'src', 'tests'];
 
@@ -36,17 +36,17 @@ final class Plugin implements HandlesArguments
         $this->output = $output;
     }
 
-    public function handleArguments(array $originals): array
+    public function handleOriginalArguments(array $originalArguments): void
     {
-        $arguments = array_merge([''], array_values(array_filter($originals, function ($original): bool {
+        $arguments = array_merge([''], array_values(array_filter($originalArguments, function ($original): bool {
             return $original === sprintf('--%s', self::WATCH_OPTION) || Str::startsWith($original, sprintf('--%s=', self::WATCH_OPTION));
         })));
 
-        $originals = array_flip($originals);
+        $originalArguments = array_flip($originalArguments);
         foreach ($arguments as $argument) {
-            unset($originals[$argument]);
+            unset($originalArguments[$argument]);
         }
-        $originals = array_flip($originals);
+        $originalArguments = array_flip($originalArguments);
 
         $inputs = [];
         $inputs[] = new InputOption(self::WATCH_OPTION, null, InputOption::VALUE_OPTIONAL, '', true);
@@ -54,7 +54,7 @@ final class Plugin implements HandlesArguments
         $input = new ArgvInput($arguments, new InputDefinition($inputs));
 
         if (! $input->hasParameterOption(sprintf('--%s', self::WATCH_OPTION))) {
-            return $originals;
+            return;
         }
 
         $this->checkFswatchIsAvailable();
@@ -68,7 +68,7 @@ final class Plugin implements HandlesArguments
         $watcher = new Watch($loop, $this->watchedDirectories);
         $watcher->run();
 
-        $command = implode(' ', $originals);
+        $command = implode(' ', [...$originalArguments, '--colors=always']);
 
         $output = $this->output;
 

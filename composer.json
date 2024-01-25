@@ -26,7 +26,7 @@
     },
     "conflict": {
         "evenement/evenement": "^1.0",
-        "pestphp/pest": "<1.0"
+        "pestphp/pest": "<2.33.0"
     },
     "autoload": {
         "psr-4": {
