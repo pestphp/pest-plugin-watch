@@ -70,6 +70,10 @@ final class Plugin implements HandlesOriginalArguments
 
         $command = implode(' ', [...$originalArguments, '--colors=always']);
 
+        if(strpos($command, '--colors=') === false) {
+            $command .= ' --colors=always';
+        }
+
         $output = $this->output;
 
         $watcher->on('change', static function () use ($command, $output): void {
@@ -106,7 +110,7 @@ final class Plugin implements HandlesOriginalArguments
     {
         exec('fswatch 2>&1', $output);
 
-        if (strpos(implode(' ', $output), 'command not found') === false) {
+        if (strpos(implode(' ', $output), 'not found') === false) {
             return;
         }
 
