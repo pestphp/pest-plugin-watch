@@ -88,7 +88,7 @@ final class Plugin implements HandlesOriginalArguments
             $output->write("\033\143");
 
             // @phpstan-ignore-next-line
-            $process->stdout->on('data', function ($line) use ($output): void {
+            $process->stdout->on('data', function (string $line) use ($output): void {
                 $output->write($line);
             });
 
